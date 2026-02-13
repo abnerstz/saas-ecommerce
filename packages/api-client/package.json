@@ -1,0 +1,32 @@
+{
+  "name": "@ecommerce/api-client",
+  "version": "1.0.0",
+  "description": "Cliente HTTP e hooks React Query para o sistema de ecommerce",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@ecommerce/types": "*",
+    "@tanstack/react-query": "^5.14.2",
+    "axios": "^1.6.2"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "^18.2.45",
+    "@types/node": "^20.10.5"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

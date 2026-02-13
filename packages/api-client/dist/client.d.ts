@@ -1,0 +1,43 @@
+import { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest, CreateProductRequest, UpdateProductRequest, ProductFilters, CreateOrderRequest, UpdateOrderRequest, OrderFilters, CreateCustomerRequest, UpdateCustomerRequest, CustomerFilters, CreateCategoryRequest, UpdateCategoryRequest, AnalyticsRequest, AnalyticsResponse, DashboardStatsResponse, RecentActivity, UploadRequest, UploadResponse, PaginatedResponse, ListParams } from '../../types/src';
+export declare class ApiClient {
+    private instance;
+    private token;
+    constructor(baseURL?: string);
+    private setupInterceptors;
+    setToken(token: string): void;
+    clearAuth(): void;
+    private request;
+    login(data: LoginRequest): Promise<LoginResponse>;
+    register(data: RegisterRequest): Promise<LoginResponse>;
+    refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse>;
+    forgotPassword(data: ForgotPasswordRequest): Promise<void>;
+    resetPassword(data: ResetPasswordRequest): Promise<void>;
+    getProfile(): Promise<any>;
+    getProducts(params?: ProductFilters & ListParams): Promise<PaginatedResponse<any>>;
+    getProduct(id: string): Promise<any>;
+    createProduct(data: CreateProductRequest): Promise<any>;
+    updateProduct(data: UpdateProductRequest): Promise<any>;
+    deleteProduct(id: string): Promise<void>;
+    getOrders(params?: OrderFilters & ListParams): Promise<PaginatedResponse<any>>;
+    getOrder(id: string): Promise<any>;
+    createOrder(data: CreateOrderRequest): Promise<any>;
+    updateOrder(data: UpdateOrderRequest): Promise<any>;
+    cancelOrder(id: string): Promise<any>;
+    getCustomers(params?: CustomerFilters & ListParams): Promise<PaginatedResponse<any>>;
+    getCustomer(id: string): Promise<any>;
+    createCustomer(data: CreateCustomerRequest): Promise<any>;
+    updateCustomer(data: UpdateCustomerRequest): Promise<any>;
+    deleteCustomer(id: string): Promise<void>;
+    getCategories(params?: ListParams): Promise<PaginatedResponse<any>>;
+    getCategory(id: string): Promise<any>;
+    createCategory(data: CreateCategoryRequest): Promise<any>;
+    updateCategory(data: UpdateCategoryRequest): Promise<any>;
+    deleteCategory(id: string): Promise<void>;
+    getDashboardStats(): Promise<DashboardStatsResponse>;
+    getAnalytics(params: AnalyticsRequest): Promise<AnalyticsResponse>;
+    getRecentActivity(): Promise<RecentActivity[]>;
+    uploadFile(data: UploadRequest): Promise<UploadResponse>;
+    deleteFile(id: string): Promise<void>;
+}
+export declare const apiClient: ApiClient;
+//# sourceMappingURL=client.d.ts.map
