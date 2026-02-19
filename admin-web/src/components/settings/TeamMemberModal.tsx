@@ -19,11 +19,11 @@ import {
 
 interface TeamMember {
   id: string
-  nome: string
+  name: string
   email: string
-  cargo: string
-  permissoes: string[]
-  ativo: boolean
+  role: string
+  permissions: string[]
+  active: boolean
   avatar?: string
 }
 
@@ -35,7 +35,7 @@ interface TeamMemberModalProps {
   mode: 'create' | 'edit' | 'view'
 }
 
-const cargosDisponiveis = [
+const availableRoles = [
   { value: 'administrador', label: 'Administrador' },
   { value: 'gerente', label: 'Gerente' },
   { value: 'operador', label: 'Operador' },
@@ -43,10 +43,9 @@ const cargosDisponiveis = [
   { value: 'suporte', label: 'Suporte' }
 ]
 
-const permissoesDisponiveis = [
+const availablePermissions = [
   { id: 'produtos', label: 'Gerenciar Produtos' },
   { id: 'pedidos', label: 'Gerenciar Pedidos' },
-  { id: 'clientes', label: 'Gerenciar Clientes' },
   { id: 'relatorios', label: 'Visualizar Relatórios' },
   { id: 'configuracoes', label: 'Acessar Configurações' },
   { id: 'usuarios', label: 'Gerenciar Usuários' }
@@ -54,29 +53,29 @@ const permissoesDisponiveis = [
 
 export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamMemberModalProps) {
   const [formData, setFormData] = useState({
-    nome: '',
+    name: '',
     email: '',
-    cargo: '',
-    permissoes: [] as string[],
-    ativo: true
+    role: '',
+    permissions: [] as string[],
+    active: true
   })
 
   useEffect(() => {
     if (member && (mode === 'edit' || mode === 'view')) {
       setFormData({
-        nome: member.nome,
+        name: member.name,
         email: member.email,
-        cargo: member.cargo,
-        permissoes: member.permissoes || [],
-        ativo: member.ativo
+        role: member.role,
+        permissions: member.permissions ?? [],
+        active: member.active
       })
     } else {
       setFormData({
-        nome: '',
+        name: '',
         email: '',
-        cargo: '',
-        permissoes: [],
-        ativo: true
+        role: '',
+        permissions: [],
+        active: true
       })
     }
   }, [member, mode])
@@ -84,7 +83,6 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (mode === 'view') return
-    
     onSave({
       ...formData,
       id: mode === 'edit' ? member?.id : undefined
@@ -96,18 +94,18 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
     if (checked) {
       setFormData({
         ...formData,
-        permissoes: [...formData.permissoes, permissionId]
+        permissions: [...formData.permissions, permissionId]
       })
     } else {
       setFormData({
         ...formData,
-        permissoes: formData.permissoes.filter(p => p !== permissionId)
+        permissions: formData.permissions.filter((p) => p !== permissionId)
       })
     }
   }
 
   const handleClose = () => {
-    setFormData({ nome: '', email: '', cargo: '', permissoes: [], ativo: true })
+    setFormData({ name: '', email: '', role: '', permissions: [], active: true })
     onClose()
   }
 
@@ -131,11 +129,11 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome Completo</Label>
+            <Label htmlFor="member-name">Nome Completo</Label>
             <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              id="member-name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Digite o nome completo"
               required
               disabled={isReadOnly}
@@ -156,19 +154,19 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cargo">Cargo</Label>
-            <Select 
-              value={formData.cargo} 
-              onValueChange={(value) => setFormData({ ...formData, cargo: value })}
+            <Label htmlFor="member-role">Cargo</Label>
+            <Select
+              value={formData.role}
+              onValueChange={(value) => setFormData({ ...formData, role: value })}
               disabled={isReadOnly}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um cargo" />
               </SelectTrigger>
               <SelectContent>
-                {cargosDisponiveis.map(cargo => (
-                  <SelectItem key={cargo.value} value={cargo.value}>
-                    {cargo.label}
+                {availableRoles.map((roleOption) => (
+                  <SelectItem key={roleOption.value} value={roleOption.value}>
+                    {roleOption.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -178,18 +176,18 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
           <div className="space-y-3">
             <Label>Permissões</Label>
             <div className="space-y-2">
-              {permissoesDisponiveis.map(permissao => (
-                <div key={permissao.id} className="flex items-center space-x-2">
+              {availablePermissions.map((permission) => (
+                <div key={permission.id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={permissao.id}
-                    checked={formData.permissoes.includes(permissao.id)}
-                    onChange={(e) => handlePermissionChange(permissao.id, e.target.checked)}
+                    id={permission.id}
+                    checked={formData.permissions.includes(permission.id)}
+                    onChange={(e) => handlePermissionChange(permission.id, e.target.checked)}
                     disabled={isReadOnly}
                     className="rounded"
                   />
-                  <Label htmlFor={permissao.id} className="text-sm font-normal">
-                    {permissao.label}
+                  <Label htmlFor={permission.id} className="text-sm font-normal">
+                    {permission.label}
                   </Label>
                 </div>
               ))}
@@ -198,12 +196,12 @@ export function TeamMemberModal({ isOpen, onClose, member, onSave, mode }: TeamM
 
           <div className="flex items-center space-x-2">
             <Switch
-              id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
+              id="member-active"
+              checked={formData.active}
+              onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
               disabled={isReadOnly}
             />
-            <Label htmlFor="ativo">Membro ativo</Label>
+            <Label htmlFor="member-active">Membro ativo</Label>
           </div>
 
           <DialogFooter>

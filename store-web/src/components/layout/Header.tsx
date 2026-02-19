@@ -1,129 +1,124 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button, Input, Badge } from '@/components/ui'
-import { 
-  Search, 
-  ShoppingCart, 
-  User, 
-  Menu,
-  X,
-  Store
-} from 'lucide-react'
+import { Search, ShoppingCart, Store, Package, Menu, X } from 'lucide-react'
+import { useCartStore } from '@/stores/cartStore'
+
+const STORE_NAME = 'Loja de Bebidas'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const cartItemsCount = 0 // TODO: Get from cart store
+  const [search, setSearch] = useState('')
+  const navigate = useNavigate()
+  const items = useCartStore((s) => s.items)
+  const cartCount = items.reduce((acc, i) => acc + i.quantity, 0)
 
-  const navigation = [
-    { name: 'Início', href: '/' },
-    { name: 'Produtos', href: '/produtos' },
-    { name: 'Ofertas', href: '/ofertas' },
-    { name: 'Contato', href: '/contato' },
-  ]
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (search.trim()) {
+      navigate(`/products?search=${encodeURIComponent(search.trim())}`)
+      setSearch('')
+      setIsMenuOpen(false)
+    }
+  }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Store className="w-8 h-8 text-primary" />
-            <span className="text-xl font-bold text-gray-900">
-              Loja
+    <header className="bg-card border-b border-border sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <Store className="w-6 h-6 text-primary" />
+            <span className="text-base font-medium text-foreground tracking-tight">
+              {STORE_NAME}
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link
+              to="/products"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Catálogo
+            </Link>
+            <Link
+              to="/orders"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Package className="w-4 h-4" />
+              Acompanhar pedido
+            </Link>
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xs mx-4">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                type="text"
+                type="search"
                 placeholder="Buscar produtos..."
-                className="pl-10 w-full"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9 text-sm bg-muted/50 border-0"
               />
             </div>
-          </div>
+          </form>
 
-          {/* Right Icons */}
-          <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Link to="/carrinho">
-              <Button variant="ghost" size="icon" className="relative">
+          <div className="flex items-center gap-1">
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9">
                 <ShoppingCart className="w-5 h-5" />
-                {cartItemsCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                {cartCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full flex items-center justify-center text-[10px] px-1"
                   >
-                    {cartItemsCount}
+                    {cartCount}
                   </Badge>
                 )}
               </Button>
             </Link>
 
-            {/* User Account */}
-            <Link to="/conta">
-              <Button variant="ghost" size="icon">
-                <User className="w-5 h-5" />
-              </Button>
-            </Link>
-
-            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden h-9 w-9"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
             >
-              {isMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Buscar produtos..."
-              className="pl-10 w-full"
-            />
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <nav className="space-y-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+          <div className="md:hidden border-t border-border py-4 space-y-3">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Buscar produtos..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+              </div>
+            </form>
+            <nav className="flex flex-col gap-1">
+              <Link
+                to="/products"
+                className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Catálogo
+              </Link>
+              <Link
+                to="/orders"
+                className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md flex items-center gap-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Package className="w-4 h-4" />
+                Acompanhar pedido
+              </Link>
             </nav>
           </div>
         )}

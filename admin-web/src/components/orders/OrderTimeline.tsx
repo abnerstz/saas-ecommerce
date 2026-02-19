@@ -1,18 +1,13 @@
 import { CheckCircle } from 'lucide-react'
 import { Order } from '../../utils/mockData'
+import { getOrderTimelineSteps } from '../../utils/statusHelpers'
 
 interface OrderTimelineProps {
   order: Order
 }
 
 export function OrderTimeline({ order }: OrderTimelineProps) {
-  const timelineSteps = [
-    { status: 'pending', label: 'Pedido Recebido', completed: true },
-    { status: 'confirmed', label: 'Pagamento Confirmado', completed: ['confirmed', 'processing', 'shipped', 'delivered'].includes(order.status) },
-    { status: 'processing', label: 'Em Processamento', completed: ['processing', 'shipped', 'delivered'].includes(order.status) },
-    { status: 'shipped', label: 'Enviado', completed: ['shipped', 'delivered'].includes(order.status) },
-    { status: 'delivered', label: 'Entregue', completed: order.status === 'delivered' }
-  ]
+  const timelineSteps = getOrderTimelineSteps(order.status)
 
   return (
     <div className="space-y-4">

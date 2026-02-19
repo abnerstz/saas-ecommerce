@@ -23,16 +23,16 @@ interface ProductModalProps {
   product: Product | null
   isEditing: boolean
   setIsEditing: (editing: boolean) => void
-  categorias: string[]
+  categories: string[]
 }
 
-export function ProductModal({ 
-  isOpen, 
-  onClose, 
-  product, 
-  isEditing, 
-  setIsEditing, 
-  categorias 
+export function ProductModal({
+  isOpen,
+  onClose,
+  product,
+  isEditing,
+  setIsEditing,
+  categories
 }: ProductModalProps) {
   const [productImages, setProductImages] = useState<string[]>(product?.images || [])
   const [dragActive, setDragActive] = useState(false)
@@ -111,9 +111,9 @@ export function ProductModal({
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categorias.map(categoria => (
-                    <SelectItem key={categoria} value={categoria}>
-                      {categoria}
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
                     </SelectItem>
                   ))}
                 </SelectContent>

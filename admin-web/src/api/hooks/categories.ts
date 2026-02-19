@@ -46,7 +46,7 @@ export const useCreateCategory = () => {
   return useMutation({
     mutationFn: (data: CreateCategoryRequest) => apiClient.createCategory(data),
     onSuccess: () => {
-      // Invalidar listas de categorias
+      // Invalidate category lists
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
     },
   });
@@ -58,7 +58,7 @@ export const useUpdateCategory = () => {
   return useMutation({
     mutationFn: (data: UpdateCategoryRequest) => apiClient.updateCategory(data),
     onSuccess: (updatedCategory, variables) => {
-      // Invalidar listas de categorias
+      // Invalidate category lists
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
       
       // Atualizar cache da categoria específica
@@ -76,13 +76,13 @@ export const useDeleteCategory = () => {
   return useMutation({
     mutationFn: (id: string) => apiClient.deleteCategory(id),
     onSuccess: (_, deletedId) => {
-      // Invalidar listas de categorias
+      // Invalidate category lists
       queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
       
       // Remover categoria específica do cache
       queryClient.removeQueries({ queryKey: categoryKeys.detail(deletedId) });
       
-      // Invalidar produtos que podem usar esta categoria
+      // Invalidate products that may use this category
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });

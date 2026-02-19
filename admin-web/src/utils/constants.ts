@@ -18,7 +18,7 @@ export const ALLOWED_DOCUMENT_TYPES = ['application/pdf'];
 export const DEFAULT_AVATAR_URL = '/images/default-avatar.png';
 export const DEFAULT_PRODUCT_IMAGE = '/images/default-product.png';
 
-// Status de pedidos com labels em português
+// Order status display labels (Portuguese)
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Pendente',
   confirmed: 'Confirmado',

@@ -1,12 +1,13 @@
-import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Button } from '@/components/ui'
-import { Search, Filter } from 'lucide-react'
+import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Button, Label } from '@/components/ui'
+import { Search } from 'lucide-react'
+import { getOrderStatusLabel } from '../../utils/statusHelpers'
 
 interface OrderFiltersProps {
   searchTerm: string
   setSearchTerm: (value: string) => void
   selectedStatus: string
   setSelectedStatus: (value: string) => void
-  statusPedidos: string[]
+  orderStatuses: string[]
   onClearFilters: () => void
 }
 
@@ -15,50 +16,56 @@ export function OrderFilters({
   setSearchTerm,
   selectedStatus,
   setSelectedStatus,
-  statusPedidos,
+  orderStatuses,
   onClearFilters
 }: OrderFiltersProps) {
-  const hasActiveFilters = searchTerm || selectedStatus !== 'todos'
+  const hasActiveFilters = searchTerm !== '' || selectedStatus !== 'todos'
 
   return (
     <div className="space-y-3 p-4 bg-muted/20 rounded-lg border">
-      <h2 className="text-base font-medium text-foreground">Filtrar e Buscar Pedidos</h2>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Buscar por número do pedido ou cliente..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-9 text-sm bg-background"
-          />
+      <h2 className="text-sm font-normal text-muted-foreground uppercase tracking-wide">Filtrar e buscar pedidos</h2>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 space-y-1.5">
+          <Label htmlFor="order-search" className="text-xs text-muted-foreground font-normal">
+            Buscar
+          </Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              id="order-search"
+              type="text"
+              placeholder="Número do pedido ou cliente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-9 text-sm bg-background"
+            />
+          </div>
         </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[140px] h-9 text-xs">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos" className="text-xs">Todos</SelectItem>
-              {statusPedidos.map(status => (
-                <SelectItem key={status} value={status} className="text-xs">
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
-          <Button variant="outline" size="sm" className="h-9 text-xs">
-            <Filter className="w-3 h-3 mr-1" />
-            Mais Filtros
-          </Button>
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="order-status" className="text-xs text-muted-foreground font-normal">
+              Status
+            </Label>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger id="order-status" className="w-[140px] h-9 text-sm font-normal">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos" className="text-sm">Todos</SelectItem>
+                {orderStatuses.map((status) => (
+                  <SelectItem key={status} value={status} className="text-sm">
+                    {getOrderStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onClearFilters}
               className="h-9 text-xs text-muted-foreground hover:text-foreground"
             >

@@ -1,309 +1,173 @@
 import { Helmet } from 'react-helmet-async'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { Button, Card, CardContent, Badge, Input } from '@/components/ui'
-import { Filter, Grid, List, Star, Search } from 'lucide-react'
+import { Card, CardContent, Input, Label, Button } from '@/components/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui'
+import { Search, Store, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useProducts } from '@/api/hooks/products'
+import { useCategories } from '@/api/hooks/categories'
 
 export default function Products() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('search') ?? searchParams.get('busca') ?? '')
+  const [categoryId, setCategoryId] = useState(searchParams.get('category') ?? searchParams.get('categoria') ?? 'all')
+  const [page, setPage] = useState(Number(searchParams.get('page') ?? searchParams.get('pagina')) || 1)
 
-  // Mock products data
-  const productImages = [
-    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1434056886845-dac89ffe9b56?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&h=300&fit=crop'
-  ]
-  
-  const productNames = [
-    'Smartphone Premium', 'Fone Bluetooth', 'Relógio Inteligente', 'Câmera Digital',
-    'Tênis Esportivo', 'Mochila Urbana', 'Camiseta Premium', 'Óculos de Sol',
-    'Notebook Gamer', 'Cadeira Ergonômica', 'Luminária LED', 'Planta Decorativa'
-  ]
+  const { data, isLoading, isError } = useProducts({
+    search: search || undefined,
+    category_id: categoryId === 'all' || categoryId === 'todas' ? undefined : categoryId,
+    page,
+    limit: 12,
+  })
+  const { data: categoriesData } = useCategories({})
 
-  const products = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    name: productNames[i],
-    price: Math.random() * 500 + 50,
-    originalPrice: Math.random() * 600 + 100,
-    image: productImages[i],
-    rating: Math.random() * 2 + 3,
-    reviews: Math.floor(Math.random() * 200) + 10,
-    category: ['Eletrônicos', 'Roupas', 'Casa', 'Esportes'][Math.floor(Math.random() * 4)],
-  }))
+  const products = data?.data ?? []
+  const meta = data?.meta
+  const categories = categoriesData?.data ?? []
+  const totalPages = meta?.totalPages ?? 1
 
-  const categories = ['Todos', 'Eletrônicos', 'Roupas', 'Casa', 'Esportes']
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (search) params.set('search', search)
+    if (categoryId !== 'all') params.set('category', categoryId)
+    if (page > 1) params.set('page', String(page))
+    setSearchParams(params, { replace: true })
+  }, [search, categoryId, page, setSearchParams])
+
+  const getImageUrl = (p: { images?: { url: string }[] }) => p.images?.[0]?.url
 
   return (
     <>
       <Helmet>
-        <title>Produtos - Loja</title>
-        <meta name="description" content="Explore nossa coleção completa de produtos com os melhores preços" />
+        <title>Catálogo - Loja de Bebidas</title>
+        <meta name="description" content="Confira nosso catálogo de bebidas." />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Produtos</h1>
-          <p className="text-gray-600">
-            Encontre exatamente o que você está procurando em nossa coleção completa
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
+            Catálogo
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Escolha os produtos e adicione ao carrinho
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Filters */}
-          <aside className="lg:col-span-1">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtros</h3>
-              
-              {/* Search */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Buscar
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    type="text"
-                    placeholder="Buscar produtos..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Categories */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categorias
-                </label>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <label key={category} className="flex items-center">
-                      <input
-                        type="radio"
-                        name="category"
-                        value={category}
-                        className="mr-2"
-                        defaultChecked={category === 'Todos'}
-                      />
-                      <span className="text-sm text-gray-600">{category}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Faixa de Preço
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input type="number" placeholder="Mín" />
-                  <Input type="number" placeholder="Máx" />
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Avaliação
-                </label>
-                <div className="space-y-2">
-                  {[4, 3, 2, 1].map((rating) => (
-                    <label key={rating} className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <div className="flex items-center">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < rating
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                        <span className="text-sm text-gray-600 ml-1">
-                          {rating}+ estrelas
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <Button className="w-full">
-                <Filter className="w-4 h-4 mr-2" />
-                Aplicar Filtros
-              </Button>
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor="products-search" className="text-xs text-muted-foreground font-normal">
+              Buscar
+            </Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                id="products-search"
+                type="search"
+                placeholder="Nome do produto..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setPage(1)
+                }}
+                className="pl-9 h-9 text-sm"
+              />
             </div>
-          </aside>
+          </div>
+          <div className="space-y-1.5 sm:w-48">
+            <Label className="text-xs text-muted-foreground font-normal">Categoria</Label>
+            <Select value={categoryId} onValueChange={(v) => { setCategoryId(v); setPage(1) }}>
+              <SelectTrigger className="h-9 text-sm font-normal">
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {categories.map((c: { id: string; name: string }) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-          {/* Main Content */}
-          <main className="lg:col-span-3">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between mb-6 bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  Mostrando {products.length} produtos
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
-                  <option>Mais Relevantes</option>
-                  <option>Menor Preço</option>
-                  <option>Maior Preço</option>
-                  <option>Mais Vendidos</option>
-                  <option>Melhor Avaliados</option>
-                </select>
-                
-                <div className="flex border border-gray-300 rounded-md">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-r-none"
-                  >
-                    <Grid className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-l-none"
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Products Grid */}
-            <div className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-                : 'space-y-4'
-            }>
-              {products.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/produto/${product.id}`}
-                  className="group"
-                >
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className={viewMode === 'grid' ? 'p-0' : 'p-4'}>
-                      {viewMode === 'grid' ? (
-                        // Grid View
-                        <>
-                          <div className="relative">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform"
-                            />
-                            {product.originalPrice > product.price && (
-                              <Badge className="absolute top-2 left-2 bg-red-500">
-                                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center space-x-1 mb-2">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {product.rating.toFixed(1)} ({product.reviews})
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg font-bold text-primary">
-                                R$ {product.price.toFixed(2)}
-                              </span>
-                              {product.originalPrice > product.price && (
-                                <span className="text-sm text-gray-500 line-through">
-                                  R$ {product.originalPrice.toFixed(2)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </>
+        {isError ? (
+          <div className="text-center py-16 bg-card rounded-lg border border-border">
+            <Store className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Erro ao carregar produtos. Tente novamente.</p>
+          </div>
+        ) : isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="aspect-square bg-muted animate-pulse" />
+                <CardContent className="p-3">
+                  <div className="h-4 bg-muted rounded animate-pulse mb-2" />
+                  <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-16 bg-card rounded-lg border border-border">
+            <Store className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Nenhum produto encontrado.</p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSearch(''); setCategoryId('all'); setPage(1) }}>
+              Limpar filtros
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {products.map((p: { id: string; name: string; price: number; images?: { url: string }[] }) => (
+                <Link key={p.id} to={`/product/${p.id}`}>
+                  <Card className="overflow-hidden hover:shadow-sm transition-shadow h-full">
+                    <div className="aspect-square bg-muted relative">
+                      {getImageUrl(p) ? (
+                        <img src={getImageUrl(p)} alt={p.name} className="w-full h-full object-cover" />
                       ) : (
-                        // List View
-                        <div className="flex space-x-4">
-                          <div className="relative flex-shrink-0">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-24 h-24 object-cover rounded-lg"
-                            />
-                            {product.originalPrice > product.price && (
-                              <Badge className="absolute -top-1 -right-1 bg-red-500 text-xs">
-                                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-1">
-                              {product.name}
-                            </h3>
-                            <p className="text-sm text-gray-600 mb-2">
-                              {product.category}
-                            </p>
-                            <div className="flex items-center space-x-1 mb-2">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {product.rating.toFixed(1)} ({product.reviews} avaliações)
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-xl font-bold text-primary">
-                                R$ {product.price.toFixed(2)}
-                              </span>
-                              {product.originalPrice > product.price && (
-                                <span className="text-sm text-gray-500 line-through">
-                                  R$ {product.originalPrice.toFixed(2)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Store className="w-10 h-10 text-muted-foreground" />
                         </div>
                       )}
+                    </div>
+                    <CardContent className="p-3">
+                      <p className="text-sm font-medium text-foreground line-clamp-2 mb-1">{p.name}</p>
+                      <p className="text-sm font-semibold text-primary tabular-nums">
+                        R$ {Number(p.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <div className="flex space-x-2">
-                <Button variant="outline" disabled>
-                  Anterior
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8 text-sm text-muted-foreground">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <Button variant="default">1</Button>
-                <Button variant="outline">2</Button>
-                <Button variant="outline">3</Button>
-                <Button variant="outline">
-                  Próximo
+                <span className="tabular-nums">Página {page} de {totalPages}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  aria-label="Próxima página"
+                >
+                  <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-            </div>
-          </main>
-        </div>
+            )}
+          </>
+        )}
       </div>
     </>
   )

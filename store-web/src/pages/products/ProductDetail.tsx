@@ -1,286 +1,177 @@
 import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { Button, Badge, Card, CardContent } from '@/components/ui'
-import { Star, Heart, Share2, Minus, Plus, ShoppingCart, Truck } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Button, Label } from '@/components/ui'
+import { Store, Minus, Plus, ShoppingCart } from 'lucide-react'
+import { useProduct } from '@/api/hooks/products'
+import { useCartStore } from '@/stores/cartStore'
 
 export default function ProductDetail() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
+  const addItem = useCartStore((s) => s.addItem)
 
-  // Mock product data
-  const product = {
-    id: Number(id),
-    name: `Smartphone Premium`,
-    price: 299.99,
-    originalPrice: 399.99,
-    images: [
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=600&h=600&fit=crop',
-    ],
-    rating: 4.5,
-    reviews: 128,
-    description: 'Smartphone premium com tecnologia de ponta, tela de alta resolução e câmera profissional. Ideal para quem busca performance e qualidade em um só dispositivo.',
-    features: [
-      'Tela OLED de 6.7 polegadas',
-      'Câmera tripla de 108MP',
-      'Processador octa-core 5G',
-      'Bateria de 5000mAh',
-      'Carregamento rápido 65W',
-      'Resistente à água IP68',
-      'Garantia de 2 anos',
-    ],
-    specifications: {
-      'Tela': '6.7" OLED 120Hz',
-      'Processador': 'Snapdragon 8 Gen 2',
-      'Memória RAM': '12GB',
-      'Armazenamento': '256GB',
-      'Câmera Principal': '108MP + 12MP + 5MP',
-      'Bateria': '5000mAh',
-      'Sistema': 'Android 14',
-      'Peso': '195g',
-      'Dimensões': '163.2 x 75.6 x 8.9 mm',
-    },
-    inStock: true,
-    stockQuantity: 15,
-  }
+  const { data: product, isLoading } = useProduct(id ?? '')
+
+  const imageUrl = product?.images?.[0]?.url
+  const inStock = product && (product.inventory_qty ?? 0) > 0
+  const maxQty = product?.inventory_qty ?? 0
 
   const handleAddToCart = () => {
-    toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`)
+    if (!product) return
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity,
+      imageUrl,
+    })
+    navigate('/cart')
   }
 
-  const handleBuyNow = () => {
-    toast.success('Redirecionando para checkout...')
+  if (!id) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8 text-center text-muted-foreground">
+        Produto não encontrado.
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="aspect-square bg-muted rounded-lg animate-pulse" />
+          <div className="space-y-4">
+            <div className="h-8 bg-muted rounded w-3/4 animate-pulse" />
+            <div className="h-6 bg-muted rounded w-24 animate-pulse" />
+            <div className="h-4 bg-muted rounded w-full animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-16 text-center">
+        <Store className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+        <p className="text-muted-foreground">Produto não encontrado.</p>
+        <Button variant="outline" size="sm" className="mt-4" onClick={() => navigate('/products')}>
+          Voltar ao catálogo
+        </Button>
+      </div>
+    )
   }
 
   return (
     <>
       <Helmet>
-        <title>{product.name} - Loja</title>
-        <meta name="description" content={product.description} />
+        <title>{product?.name ? `${product.name} - Loja de Bebidas` : 'Loja de Bebidas'}</title>
+        <meta name="description" content={String(product?.short_description || product?.description || product?.name || '')} />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={product.images[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index
-                      ? 'border-primary'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+            {imageUrl ? (
+              <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Store className="w-24 h-24 text-muted-foreground" />
+              </div>
+            )}
           </div>
 
-          {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
                 {product.name}
               </h1>
-              
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="flex items-center space-x-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                  <span className="text-sm text-gray-600">
-                    {product.rating} ({product.reviews} avaliações)
-                  </span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4 mb-4">
-                <span className="text-3xl font-bold text-primary">
-                  R$ {product.price.toFixed(2)}
-                </span>
-                {product.originalPrice > product.price && (
-                  <>
-                    <span className="text-xl text-gray-500 line-through">
-                      R$ {product.originalPrice.toFixed(2)}
-                    </span>
-                    <Badge className="bg-red-500">
-                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                    </Badge>
-                  </>
-                )}
-              </div>
-
-              <p className="text-gray-600 leading-relaxed">
-                {product.description}
+              <p className="text-2xl font-semibold text-primary tabular-nums mt-2">
+                R$ {Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
+              {(product.short_description || product.description) && (
+                <p className="text-sm text-muted-foreground mt-3">
+                  {product.short_description || product.description}
+                </p>
+              )}
             </div>
 
-            {/* Stock Status */}
-            <div className="flex items-center space-x-2">
-              {product.inStock ? (
+            <div className="flex items-center gap-2 text-sm">
+              {inStock ? (
                 <>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">
-                    Em estoque ({product.stockQuantity} unidades)
+                  <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                  <span className="text-muted-foreground">
+                    Em estoque {maxQty > 0 ? `(${maxQty} un.)` : ''}
                   </span>
                 </>
               ) : (
                 <>
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-red-600 font-medium">Fora de estoque</span>
+                  <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                  <span className="text-muted-foreground">Indisponível</span>
                 </>
               )}
             </div>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">
-                Quantidade:
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-lg">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="px-4 py-2 text-center min-w-[3rem]">
-                  {quantity}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
-                  disabled={quantity >= product.stockQuantity}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col space-y-3">
-              <Button
-                size="lg"
-                onClick={handleBuyNow}
-                disabled={!product.inStock}
-                className="w-full"
-              >
-                Comprar Agora
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={!product.inStock}
-                className="w-full"
-              >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Adicionar ao Carrinho
-              </Button>
-            </div>
-
-            {/* Shipping Info */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <Truck className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">Frete Grátis</p>
-                    <p className="text-sm text-gray-600">
-                      Para compras acima de R$ 199. Entrega em 2-5 dias úteis.
-                    </p>
+            {inStock && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground font-normal">Quantidade</Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      aria-label="Diminuir"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="w-12 text-center text-sm tabular-nums">{quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9"
+                      onClick={() => setQuantity((q) => Math.min(maxQty || 99, q + 1))}
+                      disabled={quantity >= (maxQty || 99)}
+                      aria-label="Aumentar"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
 
-        {/* Product Details Tabs */}
-        <div className="mt-16">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              <button className="border-b-2 border-primary py-2 px-1 text-primary font-medium">
-                Características
-              </button>
-              <button className="border-b-2 border-transparent py-2 px-1 text-gray-500 hover:text-gray-700">
-                Especificações
-              </button>
-              <button className="border-b-2 border-transparent py-2 px-1 text-gray-500 hover:text-gray-700">
-                Avaliações
-              </button>
-            </nav>
-          </div>
-
-          <div className="py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Principais Características
-                </h3>
-                <ul className="space-y-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
-                      <span className="text-gray-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Especificações Técnicas
-                </h3>
-                <dl className="space-y-2">
-                  {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between py-1">
-                      <dt className="text-gray-600">{key}:</dt>
-                      <dd className="font-medium text-gray-900">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    size="lg"
+                    className="flex-1 gap-2"
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Adicionar ao carrinho
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      addItem({
+                        productId: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity,
+                        imageUrl,
+                      })
+                      navigate('/checkout')
+                    }}
+                  >
+                    Comprar agora
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

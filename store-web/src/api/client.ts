@@ -29,8 +29,17 @@ import {
   PaginatedResponse,
   ListParams,
 } from '../types';
+import {
+  getMockProductsPaginated,
+  getMockProduct,
+  getMockCategoriesPaginated,
+  getMockCategory,
+  createMockOrder,
+} from '@/utils/mockData';
 
-// Configuração base do cliente HTTP
+const USE_MOCK =
+  typeof import.meta !== 'undefined' && import.meta.env?.VITE_USE_MOCK !== 'false';
+
 export class ApiClient {
   private instance: AxiosInstance;
   private token: string | null = null;
@@ -177,6 +186,16 @@ export class ApiClient {
   // ================================
 
   async getProducts(params?: ProductFilters & ListParams): Promise<PaginatedResponse<any>> {
+    if (USE_MOCK) {
+      return Promise.resolve(
+        getMockProductsPaginated({
+          search: params?.search,
+          category_id: params?.category_id,
+          page: params?.page,
+          limit: params?.limit,
+        })
+      );
+    }
     return this.request<PaginatedResponse<any>>({
       method: 'GET',
       url: '/products',
@@ -185,6 +204,17 @@ export class ApiClient {
   }
 
   async getProduct(id: string): Promise<any> {
+    if (USE_MOCK) {
+      const product = getMockProduct(id);
+      if (!product) {
+        throw {
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Produto não encontrado' },
+          timestamp: new Date().toISOString(),
+        } as ApiError;
+      }
+      return Promise.resolve(product);
+    }
     return this.request<any>({
       method: 'GET',
       url: `/products/${id}`,
@@ -235,6 +265,18 @@ export class ApiClient {
   }
 
   async createOrder(data: CreateOrderRequest): Promise<any> {
+    if (USE_MOCK) {
+      return Promise.resolve(
+        createMockOrder({
+          customer_info: data.customer_info,
+          billing_address: data.billing_address as Record<string, string>,
+          shipping_address: data.shipping_address as Record<string, string> | undefined,
+          items: data.items,
+          notes: data.notes,
+          custom_attributes: data.custom_attributes as Record<string, string> | undefined,
+        })
+      );
+    }
     return this.request<any>({
       method: 'POST',
       url: '/orders',
@@ -306,6 +348,11 @@ export class ApiClient {
   // ================================
 
   async getCategories(params?: ListParams): Promise<PaginatedResponse<any>> {
+    if (USE_MOCK) {
+      return Promise.resolve(
+        getMockCategoriesPaginated({ page: params?.page, limit: params?.limit })
+      );
+    }
     return this.request<PaginatedResponse<any>>({
       method: 'GET',
       url: '/categories',
@@ -314,6 +361,17 @@ export class ApiClient {
   }
 
   async getCategory(id: string): Promise<any> {
+    if (USE_MOCK) {
+      const category = getMockCategory(id);
+      if (!category) {
+        throw {
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Categoria não encontrada' },
+          timestamp: new Date().toISOString(),
+        } as ApiError;
+      }
+      return Promise.resolve(category);
+    }
     return this.request<any>({
       method: 'GET',
       url: `/categories/${id}`,

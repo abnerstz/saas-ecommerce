@@ -37,17 +37,11 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginRequest) => apiClient.login(data),
     onSuccess: (response: LoginResponse) => {
-      // Salvar tokens no localStorage
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
       
-      // Configurar token no cliente
       apiClient.setToken(response.access_token);
-      
-      // Invalidar queries para recarregar dados do usuário
       queryClient.invalidateQueries({ queryKey: authKeys.all });
-      
-      // Salvar dados do usuário no cache
       queryClient.setQueryData(authKeys.profile(), response.user);
     },
   });
@@ -59,17 +53,11 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: (data: RegisterRequest) => apiClient.register(data),
     onSuccess: (response: LoginResponse) => {
-      // Salvar tokens no localStorage
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
       
-      // Configurar token no cliente
       apiClient.setToken(response.access_token);
-      
-      // Invalidar queries para recarregar dados do usuário
       queryClient.invalidateQueries({ queryKey: authKeys.all });
-      
-      // Salvar dados do usuário no cache
       queryClient.setQueryData(authKeys.profile(), response.user);
     },
   });
@@ -92,10 +80,7 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      // Limpar tokens e dados de autenticação
       apiClient.clearAuth();
-      
-      // Limpar cache do React Query
       queryClient.clear();
       
       return Promise.resolve();
@@ -108,7 +93,7 @@ export const useLogout = () => {
 // ================================
 
 /**
- * Hook para verificar se o usuário está autenticado
+ * Hook to check if the user is authenticated
  */
 export const useIsAuthenticated = () => {
   const { data: user, isLoading } = useProfile();

@@ -14,38 +14,38 @@ import { TeamMemberModal } from './TeamMemberModal'
 
 interface TeamMember {
   id: string
-  nome: string
+  name: string
   email: string
-  cargo: string
-  permissoes: string[]
-  ativo: boolean
+  role: string
+  permissions: string[]
+  active: boolean
   avatar?: string
 }
 
 const teamMembersInitial: TeamMember[] = [
   {
     id: '1',
-    nome: 'Admin Santos',
+    name: 'Admin Santos',
     email: 'admin@saasecommerce.com',
-    cargo: 'administrador',
-    permissoes: ['produtos', 'pedidos', 'clientes', 'relatorios', 'configuracoes', 'usuarios'],
-    ativo: true
+    role: 'administrador',
+    permissions: ['produtos', 'pedidos', 'relatorios', 'configuracoes', 'usuarios'],
+    active: true
   },
   {
     id: '2',
-    nome: 'Maria Garcia',
+    name: 'Maria Garcia',
     email: 'maria@saasecommerce.com',
-    cargo: 'operador',
-    permissoes: ['produtos', 'pedidos', 'clientes'],
-    ativo: true
+    role: 'operador',
+    permissions: ['produtos', 'pedidos'],
+    active: true
   },
   {
     id: '3',
-    nome: 'João Silva',
+    name: 'João Silva',
     email: 'joao@saasecommerce.com',
-    cargo: 'operador',
-    permissoes: ['produtos', 'pedidos'],
-    ativo: true
+    role: 'operador',
+    permissions: ['produtos', 'pedidos'],
+    active: true
   }
 ]
 
@@ -100,34 +100,38 @@ export function TeamSettings() {
       // Criar novo membro
       const newMember: TeamMember = {
         id: Date.now().toString(),
-        nome: memberData.nome || '',
-        email: memberData.email || '',
-        cargo: memberData.cargo || '',
-        permissoes: memberData.permissoes || [],
-        ativo: memberData.ativo ?? true
+        name: memberData.name ?? '',
+        email: memberData.email ?? '',
+        role: memberData.role ?? '',
+        permissions: memberData.permissions ?? [],
+        active: memberData.active ?? true
       }
       setTeamMembers([...teamMembers, newMember])
     }
   }
 
-  const getCargoLabel = (cargo: string) => {
-    const cargos: Record<string, string> = {
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
       administrador: 'Administrador',
       gerente: 'Gerente',
       operador: 'Operador',
       vendedor: 'Vendedor',
       suporte: 'Suporte'
     }
-    return cargos[cargo] || cargo
+    return labels[role] ?? role
   }
 
-  const getCargoVariant = (cargo: string) => {
-    if (cargo === 'administrador') return 'default'
-    return 'secondary'
+  const getRoleBadgeVariant = (role: string) => {
+    return role === 'administrador' ? 'default' : 'secondary'
   }
 
-  const getInitials = (nome: string) => {
-    return nome.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
   }
 
   return (
@@ -149,17 +153,17 @@ export function TeamSettings() {
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-blue-600">
-                    {getInitials(member.nome)}
+                    {getInitials(member.name)}
                   </span>
                 </div>
                 <div>
-                  <h5 className="font-medium text-sm text-foreground">{member.nome}</h5>
+                  <h5 className="font-medium text-sm text-foreground">{member.name}</h5>
                   <p className="text-xs text-muted-foreground">{member.email}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant={getCargoVariant(member.cargo)} className="text-xs">
-                  {getCargoLabel(member.cargo)}
+                <Badge variant={getRoleBadgeVariant(member.role)} className="text-xs">
+                  {getRoleLabel(member.role)}
                 </Badge>
                 <Button 
                   variant="outline" 
@@ -179,7 +183,7 @@ export function TeamSettings() {
                   <Edit className="w-3 h-3 mr-1" />
                   Editar
                 </Button>
-                {member.cargo !== 'administrador' && (
+                {member.role !== 'administrador' && (
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -218,7 +222,7 @@ export function TeamSettings() {
           <DialogHeader>
             <DialogTitle>Confirmar Remoção</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja remover "{memberToDelete?.nome}" da equipe? 
+              Tem certeza que deseja remover "{memberToDelete?.name}" da equipe? 
               Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>

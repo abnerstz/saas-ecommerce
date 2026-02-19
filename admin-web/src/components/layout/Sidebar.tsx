@@ -1,70 +1,156 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { cn } from '@/components/ui'
-import { 
+import {
   LayoutDashboard,
   Package,
+  List,
+  FolderTree,
   ShoppingCart,
-  Users,
   Settings,
-  Store
+  Store,
+  Users,
+  Server,
+  ChevronDown,
+  BarChart3
 } from 'lucide-react'
+import { useState } from 'react'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Produtos', href: '/products', icon: Package },
-  { name: 'Pedidos', href: '/orders', icon: ShoppingCart },
-  { name: 'Clientes', href: '/customers', icon: Users },
-  { name: 'Configurações', href: '/settings', icon: Settings },
-]
+const menuHome = { name: 'Início', href: '/dashboard', icon: LayoutDashboard }
+
+const menuProducts = {
+  name: 'Produtos',
+  icon: Package,
+  items: [
+    { name: 'Lista de produtos', href: '/products', icon: List },
+    { name: 'Categorias', href: '/products/categorias', icon: FolderTree }
+  ]
+}
+
+const menuOrders = {
+  name: 'Pedidos',
+  icon: ShoppingCart,
+  items: [
+    { name: 'Métricas e vendas', href: '/orders/metricas', icon: BarChart3 },
+    { name: 'Lista de pedidos', href: '/orders', icon: List }
+  ]
+}
+
+const menuSettings = {
+  name: 'Configurações',
+  icon: Settings,
+  items: [
+    { name: 'Loja', href: '/settings/loja', icon: Store },
+    { name: 'Equipe', href: '/settings/equipe', icon: Users },
+    { name: 'Sistema', href: '/settings/sistema', icon: Server }
+  ]
+}
 
 export default function Sidebar() {
-  const location = useLocation()
+  const [productsMenuOpen, setProductsMenuOpen] = useState(false)
+  const [ordersMenuOpen, setOrdersMenuOpen] = useState(false)
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false)
+
+const navLinkClass =
+    'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+  const navSubLinkClass =
+    'flex items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+  const navButtonClass =
+    'flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900'
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
       <div className="flex flex-col h-full">
-        {/* Logo */}
         <div className="flex items-center h-16 px-6 border-b border-gray-200">
           <Store className="w-8 h-8 text-primary" />
           <span className="ml-3 text-xl font-semibold text-gray-900">
-            Admin
+            Painel Loja
           </span>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                )}
-              >
-                <item.icon className="w-5 h-5 mr-3" />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <Link to={menuHome.href} className={navLinkClass}>
+            <menuHome.icon className="w-5 h-5 mr-3" />
+            {menuHome.name}
+          </Link>
 
-        {/* User info */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-primary-foreground">A</span>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">Admin</p>
-              <p className="text-xs text-gray-500">admin@empresa.com</p>
-            </div>
+          <div>
+            <button
+              type="button"
+              onClick={() => setProductsMenuOpen(!productsMenuOpen)}
+              className={navButtonClass}
+            >
+              <span className="flex items-center">
+                <menuProducts.icon className="w-5 h-5 mr-3" />
+                {menuProducts.name}
+              </span>
+              <ChevronDown
+                className={cn('w-4 h-4 transition-transform', productsMenuOpen && 'rotate-180')}
+              />
+            </button>
+            {productsMenuOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-2">
+                {menuProducts.items.map((item) => (
+                  <Link key={item.href} to={item.href} className={navSubLinkClass}>
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={() => setOrdersMenuOpen(!ordersMenuOpen)}
+              className={navButtonClass}
+            >
+              <span className="flex items-center">
+                <menuOrders.icon className="w-5 h-5 mr-3" />
+                {menuOrders.name}
+              </span>
+              <ChevronDown
+                className={cn('w-4 h-4 transition-transform', ordersMenuOpen && 'rotate-180')}
+              />
+            </button>
+            {ordersMenuOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-2">
+                {menuOrders.items.map((item) => (
+                  <Link key={item.href} to={item.href} className={navSubLinkClass}>
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
+              className={navButtonClass}
+            >
+              <span className="flex items-center">
+                <menuSettings.icon className="w-5 h-5 mr-3" />
+                {menuSettings.name}
+              </span>
+              <ChevronDown
+                className={cn('w-4 h-4 transition-transform', settingsMenuOpen && 'rotate-180')}
+              />
+            </button>
+            {settingsMenuOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-2">
+                {menuSettings.items.map((item) => (
+                  <Link key={item.href} to={item.href} className={navSubLinkClass}>
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </nav>
       </div>
     </div>
   )

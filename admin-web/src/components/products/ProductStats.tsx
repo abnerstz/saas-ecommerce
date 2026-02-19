@@ -4,10 +4,10 @@ import { Package, AlertTriangle, DollarSign, Filter } from 'lucide-react'
 interface ProductStatsProps {
   stats: {
     total: number
-    ativos: number
-    estoqueBaixo: number
-    semEstoque: number
-    valorTotal: number
+    activeCount: number
+    lowStockCount: number
+    outOfStockCount: number
+    totalValue: number
   }
   filteredCount: number
 }
@@ -23,9 +23,9 @@ export function ProductStats({ stats, filteredCount }: ProductStatsProps) {
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+          <div className="text-2xl font-semibold text-foreground tabular-nums">{stats.total}</div>
           <p className="text-xs text-muted-foreground">
-            {stats.ativos} ativos
+            {stats.activeCount} ativos
           </p>
         </CardContent>
       </Card>
@@ -38,7 +38,7 @@ export function ProductStats({ stats, filteredCount }: ProductStatsProps) {
           <AlertTriangle className="h-4 w-4 text-amber-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-amber-600">{stats.estoqueBaixo}</div>
+          <div className="text-2xl font-semibold text-amber-600 tabular-nums">{stats.lowStockCount}</div>
           <p className="text-xs text-muted-foreground">
             Produtos abaixo de 10 unidades
           </p>
@@ -53,7 +53,7 @@ export function ProductStats({ stats, filteredCount }: ProductStatsProps) {
           <AlertTriangle className="h-4 w-4 text-red-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">{stats.semEstoque}</div>
+          <div className="text-2xl font-semibold text-red-600 tabular-nums">{stats.outOfStockCount}</div>
           <p className="text-xs text-muted-foreground">
             Produtos indisponíveis
           </p>
@@ -68,8 +68,8 @@ export function ProductStats({ stats, filteredCount }: ProductStatsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            R$ {stats.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div className="text-2xl font-semibold tabular-nums">
+            R$ {stats.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground">
             Valor em estoque
@@ -85,7 +85,7 @@ export function ProductStats({ stats, filteredCount }: ProductStatsProps) {
           <Filter className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{filteredCount}</div>
+          <div className="text-2xl font-semibold tabular-nums">{filteredCount}</div>
           <p className="text-xs text-muted-foreground">
             Resultados atuais
           </p>

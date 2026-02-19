@@ -41,7 +41,7 @@ export function MetricCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-foreground">
+        <div className="text-2xl font-semibold text-foreground tabular-nums">
           {formatValue(value)}
         </div>
         <div className="flex items-center text-xs mt-1">

@@ -9,11 +9,6 @@ import {
   Button,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -29,7 +24,7 @@ import {
   RadioGroupItem
 } from '@/components/ui'
 import { Search, Plus, Minus, Trash2, ShoppingCart, User, MapPin, Truck, Store } from 'lucide-react'
-import { products, customers, Product } from '../../utils/mockData'
+import { products, Product } from '../../utils/mockData'
 
 interface ProductItem {
   id: string
@@ -67,8 +62,6 @@ interface NewOrderModalProps {
 
 export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedClient, setSelectedClient] = useState('')
-  const [isGuestCustomer, setIsGuestCustomer] = useState(false)
   const [guestCustomerData, setGuestCustomerData] = useState({
     name: '',
     email: '',
@@ -124,26 +117,14 @@ export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
   )
 
   const handleSubmit = () => {
-    // Validação: deve ter produtos e dados do cliente (cadastrado ou avulso)
     if (selectedProducts.length === 0) return
-    if (!isGuestCustomer && !selectedClient) return
-    if (isGuestCustomer && !guestCustomerData.name.trim()) return
+    if (!guestCustomerData.name.trim()) return
     if (deliveryType === 'delivery' && (!deliveryAddress.street.trim() || !deliveryAddress.number.trim())) return
 
-    let customerData
-    if (isGuestCustomer) {
-      customerData = {
-        name: guestCustomerData.name,
-        email: guestCustomerData.email,
-        phone: guestCustomerData.phone
-      }
-    } else {
-      const customer = customers.find(c => c.id === selectedClient)
-      customerData = {
-        name: customer?.name || '',
-        email: customer?.email || '',
-        phone: customer?.phone || ''
-      }
+    const customerData = {
+      name: guestCustomerData.name,
+      email: guestCustomerData.email,
+      phone: guestCustomerData.phone
     }
 
     let shippingAddress = 'Não aplicável'
@@ -159,7 +140,7 @@ export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
       customerName: customerData.name,
       customerEmail: customerData.email,
       customerPhone: customerData.phone,
-      isGuestCustomer,
+      isGuestCustomer: true,
       deliveryType,
       deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : undefined,
       items: selectedProducts,
@@ -173,8 +154,6 @@ export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
   }
 
   const handleClose = () => {
-    setSelectedClient('')
-    setIsGuestCustomer(false)
     setGuestCustomerData({ name: '', email: '', phone: '' })
     setDeliveryType('local')
     setDeliveryAddress({
@@ -200,92 +179,49 @@ export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
             Novo Pedido
           </DialogTitle>
           <DialogDescription>
-            Crie um novo pedido selecionando cliente e produtos
+            Informe os dados do cliente e adicione os produtos do pedido
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Tipo de Cliente */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
                 <User className="w-4 h-4 mr-2" />
-                Dados do Cliente
+                Dados do cliente
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <RadioGroup 
-                value={isGuestCustomer ? 'guest' : 'registered'} 
-                onValueChange={(value: string) => {
-                  setIsGuestCustomer(value === 'guest')
-                  if (value === 'guest') {
-                    setSelectedClient('')
-                  } else {
-                    setGuestCustomerData({ name: '', email: '', phone: '' })
-                  }
-                }}
-                className="flex gap-6"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="registered" id="registered" />
-                  <Label htmlFor="registered">Cliente Cadastrado</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="guest" id="guest" />
-                  <Label htmlFor="guest">Cliente Avulso</Label>
-                </div>
-              </RadioGroup>
-
-              {!isGuestCustomer ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Selecionar Cliente</Label>
-                  <Select value={selectedClient} onValueChange={setSelectedClient}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um cliente cadastrado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map(client => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name} - {client.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="guest-name">Nome *</Label>
+                  <Input
+                    id="guest-name"
+                    placeholder="Nome do cliente"
+                    value={guestCustomerData.name}
+                    onChange={(e) => setGuestCustomerData(prev => ({ ...prev, name: e.target.value }))}
+                  />
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="guest-name">Nome *</Label>
-                      <Input
-                        id="guest-name"
-                        placeholder="Nome do cliente"
-                        value={guestCustomerData.name}
-                        onChange={(e) => setGuestCustomerData(prev => ({ ...prev, name: e.target.value }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="guest-phone">Telefone *</Label>
-                      <Input
-                        id="guest-phone"
-                        placeholder="(00) 00000-0000"
-                        value={guestCustomerData.phone}
-                        onChange={(e) => setGuestCustomerData(prev => ({ ...prev, phone: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="guest-email">Email (opcional)</Label>
-                    <Input
-                      id="guest-email"
-                      type="email"
-                      placeholder="email@exemplo.com"
-                      value={guestCustomerData.email}
-                      onChange={(e) => setGuestCustomerData(prev => ({ ...prev, email: e.target.value }))}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guest-phone">Telefone (opcional)</Label>
+                  <Input
+                    id="guest-phone"
+                    placeholder="(00) 00000-0000"
+                    value={guestCustomerData.phone}
+                    onChange={(e) => setGuestCustomerData(prev => ({ ...prev, phone: e.target.value }))}
+                  />
                 </div>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="guest-email">Email (opcional)</Label>
+                <Input
+                  id="guest-email"
+                  type="email"
+                  placeholder="email@exemplo.com"
+                  value={guestCustomerData.email}
+                  onChange={(e) => setGuestCustomerData(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
             </CardContent>
           </Card>
 
@@ -543,8 +479,7 @@ export function NewOrderModal({ isOpen, onClose, onSave }: NewOrderModalProps) {
             onClick={handleSubmit}
             disabled={
               selectedProducts.length === 0 ||
-              (!isGuestCustomer && !selectedClient) ||
-              (isGuestCustomer && !guestCustomerData.name.trim()) ||
+              !guestCustomerData.name.trim() ||
               (deliveryType === 'delivery' && (!deliveryAddress.street.trim() || !deliveryAddress.number.trim() || !deliveryAddress.neighborhood.trim() || !deliveryAddress.city.trim() || !deliveryAddress.zipCode.trim()))
             }
           >

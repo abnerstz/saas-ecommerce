@@ -6,7 +6,7 @@
  * and provides realistic test data for development.
  * 
  * Data Categories:
- * - Core Entities: Products, Customers, Orders
+ * - Core Entities: Products, Orders
  * - Analytics: Dashboard metrics, sales data, conversion funnel
  * - System Status: Inventory, delivery performance, system health
  */
@@ -28,20 +28,6 @@ export interface Product {
   images?: string[]
   description?: string
   totalValue: number
-}
-
-export interface Customer {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  totalSpent: number
-  lastOrder: Date
-  purchaseFrequency: number
-  status: 'new' | 'recurring' | 'vip' | 'inactive'
-  address?: string
-  registrationDate: Date
-  ltv: number
 }
 
 export interface OrderItem {
@@ -287,73 +273,6 @@ export const products: Product[] = [
     sales30d: 15,
     status: 'active',
     totalValue: 39999.95
-  }
-]
-
-/**
- * Customer database with diverse customer profiles
- * Includes spending patterns, loyalty status, and engagement metrics
- */
-export const customers: Customer[] = [
-  {
-    id: '1',
-    name: 'John Silva Santos',
-    email: 'john.silva@email.com',
-    phone: '+1 (555) 123-4567',
-    totalSpent: 25780.95,
-    lastOrder: new Date('2024-08-29'),
-    purchaseFrequency: 3.2,
-    status: 'vip',
-    registrationDate: new Date('2023-05-15'),
-    ltv: 45000.00
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira Costa',
-    email: 'maria.oliveira@email.com',
-    phone: '+1 (555) 234-5678',
-    totalSpent: 8945.50,
-    lastOrder: new Date('2024-08-28'),
-    purchaseFrequency: 2.1,
-    status: 'recurring',
-    registrationDate: new Date('2023-08-22'),
-    ltv: 18000.00
-  },
-  {
-    id: '3',
-    name: 'Peter Lima',
-    email: 'peter.lima@email.com',
-    phone: '+1 (555) 345-6789',
-    totalSpent: 1299.99,
-    lastOrder: new Date('2024-08-30'),
-    purchaseFrequency: 1.0,
-    status: 'new',
-    registrationDate: new Date('2024-08-25'),
-    ltv: 3500.00
-  },
-  {
-    id: '4',
-    name: 'Ana Carolina Sousa',
-    email: 'ana.sousa@email.com',
-    phone: '+1 (555) 456-7890',
-    totalSpent: 15670.30,
-    lastOrder: new Date('2024-08-27'),
-    purchaseFrequency: 2.8,
-    status: 'recurring',
-    registrationDate: new Date('2023-11-10'),
-    ltv: 28000.00
-  },
-  {
-    id: '5',
-    name: 'Carlos Eduardo Ferreira',
-    email: 'carlos.ferreira@email.com',
-    phone: '+1 (555) 567-8901',
-    totalSpent: 890.50,
-    lastOrder: new Date('2024-07-15'),
-    purchaseFrequency: 0.8,
-    status: 'inactive',
-    registrationDate: new Date('2023-12-05'),
-    ltv: 2500.00
   }
 ]
 
@@ -630,8 +549,8 @@ export const paymentMethods = [
  * Shows revenue distribution across different sales channels
  */
 export const salesChannels: SalesChannel[] = [
-  { name: 'E-commerce', value: 134680.45, percentage: 85.8, color: '#3b82f6' },
-  { name: 'Physical Store', value: 22100.50, percentage: 14.2, color: '#f59e0b' }
+  { name: 'Loja física', value: 22100.5, percentage: 14.2, color: '#f59e0b' },
+  { name: 'Vendas online', value: 134680.45, percentage: 85.8, color: '#3b82f6' }
 ]
 
 /**
@@ -737,6 +656,34 @@ export const monthlyGoal: MonthlyGoal = {
   remaining: 43219.05,
   target: 200000.00
 }
+
+export interface StoreInfo {
+  name: string
+  cnpj: string
+  email: string
+  phone: string
+  address: string
+}
+
+export interface TeamMember {
+  name: string
+  role: string
+  email: string
+}
+
+export const storeInfo: StoreInfo = {
+  name: 'Loja de Bebidas',
+  cnpj: '12.345.678/0001-90',
+  email: 'contato@lojadebebidas.com.br',
+  phone: '(11) 3456-7890',
+  address: 'Av. Paulista, 1000 — São Paulo, SP'
+}
+
+export const teamMembers: TeamMember[] = [
+  { name: 'Ana Costa', role: 'Administradora', email: 'ana@lojadebebidas.com.br' },
+  { name: 'Bruno Lima', role: 'Vendas', email: 'bruno@lojadebebidas.com.br' },
+  { name: 'Carla Souza', role: 'Estoque', email: 'carla@lojadebebidas.com.br' }
+]
 
 /**
  * Pending tasks requiring attention

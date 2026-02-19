@@ -47,10 +47,7 @@ export const useCreateOrder = () => {
   return useMutation({
     mutationFn: (data: CreateOrderRequest) => apiClient.createOrder(data),
     onSuccess: () => {
-      // Invalidar listas de pedidos
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
-      
-      // Invalidar analytics que podem ser afetados
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
   });
@@ -62,16 +59,11 @@ export const useUpdateOrder = () => {
   return useMutation({
     mutationFn: (data: UpdateOrderRequest) => apiClient.updateOrder(data),
     onSuccess: (updatedOrder, variables) => {
-      // Invalidar listas de pedidos
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
-      
-      // Atualizar cache do pedido específico
       queryClient.setQueryData(
         orderKeys.detail(variables.id),
         updatedOrder
       );
-      
-      // Invalidar analytics
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
   });
@@ -83,10 +75,7 @@ export const useCancelOrder = () => {
   return useMutation({
     mutationFn: (id: string) => apiClient.cancelOrder(id),
     onSuccess: (updatedOrder, orderId) => {
-      // Invalidar listas de pedidos
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
-      
-      // Atualizar cache do pedido específico
       queryClient.setQueryData(
         orderKeys.detail(orderId),
         updatedOrder

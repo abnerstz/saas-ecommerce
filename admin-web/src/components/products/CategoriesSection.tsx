@@ -24,23 +24,22 @@ import { CategoryModal } from './CategoryModal'
 
 interface Category {
   id: string
-  nome: string
-  descricao: string
-  ativa: boolean
-  produtosCount: number
+  name: string
+  description: string
+  active: boolean
+  productsCount: number
 }
 
-// Mock data - em produção viria da API
-const categoriasMock: Category[] = [
-  { id: '1', nome: 'Eletrônicos', descricao: 'Smartphones, tablets, laptops e acessórios', ativa: true, produtosCount: 45 },
-  { id: '2', nome: 'Roupas', descricao: 'Vestuário masculino e feminino', ativa: true, produtosCount: 123 },
-  { id: '3', nome: 'Casa e Jardim', descricao: 'Móveis, decoração e utensílios domésticos', ativa: true, produtosCount: 78 },
-  { id: '4', nome: 'Esportes', descricao: 'Equipamentos esportivos e fitness', ativa: false, produtosCount: 32 },
-  { id: '5', nome: 'Livros', descricao: 'Literatura, técnicos e educacionais', ativa: true, produtosCount: 156 }
+const categoriesMock: Category[] = [
+  { id: '1', name: 'Cervejas', description: 'Cervejas em garrafa, lata e chopp', active: true, productsCount: 45 },
+  { id: '2', name: 'Vinhos', description: 'Vinhos tintos, brancos e espumantes', active: true, productsCount: 38 },
+  { id: '3', name: 'Destilados', description: 'Whisky, vodka, cachaça e outros', active: true, productsCount: 52 },
+  { id: '4', name: 'Sem álcool', description: 'Refrigerantes, sucos e água', active: true, productsCount: 28 },
+  { id: '5', name: 'Acessórios', description: 'Copos, abridores e gelo', active: false, productsCount: 12 }
 ]
 
 export function CategoriesSection() {
-  const [categories, setCategories] = useState<Category[]>(categoriasMock)
+  const [categories, setCategories] = useState<Category[]>(categoriesMock)
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -90,10 +89,10 @@ export function CategoriesSection() {
       // Criar nova categoria
       const newCategory: Category = {
         id: Date.now().toString(),
-        nome: categoryData.nome || '',
-        descricao: categoryData.descricao || '',
-        ativa: categoryData.ativa ?? true,
-        produtosCount: 0
+        name: categoryData.name ?? '',
+        description: categoryData.description ?? '',
+        active: categoryData.active ?? true,
+        productsCount: 0
       }
       setCategories([...categories, newCategory])
     }
@@ -132,18 +131,18 @@ export function CategoriesSection() {
             <TableBody>
               {categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium">{category.nome}</TableCell>
+                  <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                    {category.descricao}
+                    {category.description}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={category.ativa ? "default" : "secondary"}>
-                      {category.ativa ? "Ativa" : "Inativa"}
+                    <Badge variant={category.active ? 'default' : 'secondary'}>
+                      {category.active ? 'Ativa' : 'Inativa'}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {category.produtosCount} produtos
+                      {category.productsCount} produtos
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -201,20 +200,20 @@ export function CategoriesSection() {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Nome</label>
-                  <p className="text-sm font-semibold">{selectedCategory.nome}</p>
+                  <p className="text-sm font-semibold">{selectedCategory.name}</p>
                 </div>
                 
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Descrição</label>
-                  <p className="text-sm">{selectedCategory.descricao || 'Sem descrição'}</p>
+                  <p className="text-sm">{selectedCategory.description || 'Sem descrição'}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Status</label>
                     <div className="mt-1">
-                      <Badge variant={selectedCategory.ativa ? "default" : "secondary"}>
-                        {selectedCategory.ativa ? "Ativa" : "Inativa"}
+                      <Badge variant={selectedCategory.active ? 'default' : 'secondary'}>
+                        {selectedCategory.active ? 'Ativa' : 'Inativa'}
                       </Badge>
                     </div>
                   </div>
@@ -223,7 +222,7 @@ export function CategoriesSection() {
                     <label className="text-sm font-medium text-muted-foreground">Produtos</label>
                     <div className="mt-1">
                       <Badge variant="outline">
-                        {selectedCategory.produtosCount} produtos
+                        {selectedCategory.productsCount} produtos
                       </Badge>
                     </div>
                   </div>
@@ -253,7 +252,7 @@ export function CategoriesSection() {
             <DialogHeader>
               <DialogTitle>Confirmar Exclusão</DialogTitle>
               <DialogDescription>
-                Tem certeza que deseja excluir a categoria "{categoryToDelete?.nome}"? 
+                Tem certeza que deseja excluir a categoria "{categoryToDelete?.name}"? 
                 Esta ação não pode ser desfeita.
               </DialogDescription>
             </DialogHeader>

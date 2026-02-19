@@ -1,15 +1,20 @@
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow, 
-  Badge, 
-  Button 
+import { useState, useEffect } from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+  Badge,
+  Button
 } from '@/components/ui'
-import { User, Calendar, CreditCard, Eye, Edit, Package } from 'lucide-react'
+import { User, Calendar, CreditCard, Eye, Edit, Package, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Order } from '../../utils/mockData'
+import { getOrderStatusLabel, getOrderStatusBadgeVariant } from '../../utils/statusHelpers'
+
+const DEFAULT_PAGE_SIZE = 10
 
 interface OrdersTableProps {
   orders: Order[]
@@ -20,17 +25,18 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ orders, onView, onEdit, onClearFilters, hasActiveFilters }: OrdersTableProps) {
-  const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
-    const variants = {
-      entregue: 'default' as const,
-      enviado: 'secondary' as const,
-      processando: 'outline' as const,
-      confirmado: 'outline' as const,
-      pendente: 'outline' as const,
-      cancelado: 'destructive' as const
-    }
-    return variants[status as keyof typeof variants] || 'outline'
-  }
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(DEFAULT_PAGE_SIZE)
+
+  const total = orders.length
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const start = (page - 1) * pageSize
+  const end = Math.min(start + pageSize, total)
+  const pageOrders = orders.slice(start, end)
+
+  useEffect(() => {
+    setPage(1)
+  }, [orders.length])
 
   if (orders.length === 0) {
     return (
@@ -64,17 +70,17 @@ export function OrdersTable({ orders, onView, onEdit, onClearFilters, hasActiveF
       <Table className="w-full text-sm">
         <TableHeader>
           <TableRow className="border-b bg-muted/20">
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">PEDIDO</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">CLIENTE</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">DATA</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">VALOR</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">STATUS</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">PAGAMENTO</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">AÇÕES</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Pedido</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Cliente</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Data</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Valor</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Status</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Pagamento</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground p-2 text-left">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.map((order) => (
+          {pageOrders.map((order) => (
             <TableRow key={order.id} className="border-b hover:bg-muted/50 transition-colors">
               <TableCell className="p-2">
                 <div className="font-medium text-foreground">{order.orderNumber}</div>
@@ -98,8 +104,8 @@ export function OrdersTable({ orders, onView, onEdit, onClearFilters, hasActiveF
                 </div>
               </TableCell>
               <TableCell className="p-2">
-                <Badge variant={getStatusBadgeVariant(order.status)}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <Badge variant={getOrderStatusBadgeVariant(order.status)}>
+                  {getOrderStatusLabel(order.status)}
                 </Badge>
               </TableCell>
               <TableCell className="p-2">
@@ -129,6 +135,42 @@ export function OrdersTable({ orders, onView, onEdit, onClearFilters, hasActiveF
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={7} className="p-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span>
+                  Mostrando {total === 0 ? 0 : start + 1}–{end} de {total} pedido{total !== 1 ? 's' : ''}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    aria-label="Página anterior"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="min-w-[80px] text-center tabular-nums">
+                    Página {page} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    aria-label="Próxima página"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   )

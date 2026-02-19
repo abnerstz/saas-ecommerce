@@ -4,9 +4,9 @@ import { Package, TrendingUp, Clock, CreditCard } from 'lucide-react'
 interface OrderStatsProps {
   stats: {
     total: number
-    valorTotal: number
-    tempoMedioProcessamento: number
-    pedidosHoje: number
+    totalAmount: number
+    averageProcessingTimeHours: number
+    ordersToday: number
   }
 }
 
@@ -21,9 +21,9 @@ export function OrderStats({ stats }: OrderStatsProps) {
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.total}</div>
+          <div className="text-2xl font-semibold tabular-nums">{stats.total}</div>
           <p className="text-xs text-muted-foreground">
-            {stats.pedidosHoje} hoje
+            {stats.ordersToday} hoje
           </p>
         </CardContent>
       </Card>
@@ -36,8 +36,8 @@ export function OrderStats({ stats }: OrderStatsProps) {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            R$ {stats.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div className="text-2xl font-semibold tabular-nums">
+            R$ {stats.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground">
             Todos os pedidos
@@ -53,7 +53,7 @@ export function OrderStats({ stats }: OrderStatsProps) {
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.tempoMedioProcessamento.toFixed(0)}h</div>
+          <div className="text-2xl font-semibold tabular-nums">{stats.averageProcessingTimeHours.toFixed(0)}h</div>
           <p className="text-xs text-muted-foreground">
             Processamento
           </p>
@@ -68,8 +68,8 @@ export function OrderStats({ stats }: OrderStatsProps) {
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            R$ {(stats.valorTotal / stats.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div className="text-2xl font-semibold tabular-nums">
+            R$ {(stats.total > 0 ? stats.totalAmount / stats.total : 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground">
             Por pedido

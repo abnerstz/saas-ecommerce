@@ -14,10 +14,10 @@ import {
 
 interface Category {
   id: string
-  nome: string
-  descricao: string
-  ativa: boolean
-  produtosCount?: number
+  name: string
+  description: string
+  active: boolean
+  productsCount?: number
 }
 
 interface CategoryModalProps {
@@ -30,23 +30,23 @@ interface CategoryModalProps {
 
 export function CategoryModal({ isOpen, onClose, category, onSave, isEditing }: CategoryModalProps) {
   const [formData, setFormData] = useState({
-    nome: '',
-    descricao: '',
-    ativa: true
+    name: '',
+    description: '',
+    active: true
   })
 
   useEffect(() => {
     if (category && isEditing) {
       setFormData({
-        nome: category.nome,
-        descricao: category.descricao,
-        ativa: category.ativa
+        name: category.name,
+        description: category.description,
+        active: category.active
       })
     } else {
       setFormData({
-        nome: '',
-        descricao: '',
-        ativa: true
+        name: '',
+        description: '',
+        active: true
       })
     }
   }, [category, isEditing])
@@ -61,7 +61,7 @@ export function CategoryModal({ isOpen, onClose, category, onSave, isEditing }: 
   }
 
   const handleClose = () => {
-    setFormData({ nome: '', descricao: '', ativa: true })
+    setFormData({ name: '', description: '', active: true })
     onClose()
   }
 
@@ -82,22 +82,24 @@ export function CategoryModal({ isOpen, onClose, category, onSave, isEditing }: 
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome da Categoria</Label>
+            <Label htmlFor="category-name">Nome da Categoria</Label>
             <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              id="category-name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Eletrônicos, Roupas, Casa..."
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
+            <Label htmlFor="category-description">Descrição</Label>
             <textarea
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, descricao: e.target.value })}
+              id="category-description"
+              value={formData.description}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Descreva brevemente esta categoria..."
               rows={3}
               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -107,12 +109,12 @@ export function CategoryModal({ isOpen, onClose, category, onSave, isEditing }: 
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
-              id="ativa"
-              checked={formData.ativa}
-              onChange={(e) => setFormData({ ...formData, ativa: e.target.checked })}
+              id="category-active"
+              checked={formData.active}
+              onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
               className="rounded"
             />
-            <Label htmlFor="ativa">Categoria ativa</Label>
+            <Label htmlFor="category-active">Categoria ativa</Label>
           </div>
 
           <DialogFooter>

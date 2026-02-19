@@ -47,7 +47,6 @@ export const useCreateProduct = () => {
   return useMutation({
     mutationFn: (data: CreateProductRequest) => apiClient.createProduct(data),
     onSuccess: () => {
-      // Invalidar listas de produtos
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
   });
@@ -59,10 +58,7 @@ export const useUpdateProduct = () => {
   return useMutation({
     mutationFn: (data: UpdateProductRequest) => apiClient.updateProduct(data),
     onSuccess: (updatedProduct, variables) => {
-      // Invalidar listas de produtos
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      
-      // Atualizar cache do produto específico
       queryClient.setQueryData(
         productKeys.detail(variables.id),
         updatedProduct
@@ -77,10 +73,7 @@ export const useDeleteProduct = () => {
   return useMutation({
     mutationFn: (id: string) => apiClient.deleteProduct(id),
     onSuccess: (_, deletedId) => {
-      // Invalidar listas de produtos
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      
-      // Remover produto específico do cache
       queryClient.removeQueries({ queryKey: productKeys.detail(deletedId) });
     },
   });
@@ -91,7 +84,7 @@ export const useDeleteProduct = () => {
 // ================================
 
 /**
- * Hook para buscar produtos com filtros reativos
+ * Hook to fetch products with reactive filters
  */
 export const useProductsWithFilters = () => {
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
-import { Badge, Button } from '@/components/ui'
-import { Plus, TrendingUp } from 'lucide-react'
+import { Badge } from '@/components/ui'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { products, categories, Product } from '../../utils/mockData'
 import { PageHeader } from '../../components/shared/PageHeader'
@@ -8,7 +8,6 @@ import { ProductStats } from '../../components/products/ProductStats'
 import { ProductFilters } from '../../components/products/ProductFilters'
 import { ProductsTable } from '../../components/products/ProductsTable'
 import { ProductModal } from '../../components/products/ProductModal'
-import { CategoriesSection } from '../../components/products/CategoriesSection'
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -36,13 +35,13 @@ export default function Products() {
   // Calculated statistics
   const stats = {
     total: products.length,
-    ativos: products.filter(p => p.status === 'active').length,
-    estoqueBaixo: products.filter(p => p.stock <= 10 && p.stock > 0).length,
-    semEstoque: products.filter(p => p.stock === 0).length,
-    valorTotal: products.reduce((sum, p) => sum + p.totalValue, 0)
+    activeCount: products.filter((p) => p.status === 'active').length,
+    lowStockCount: products.filter((p) => p.stock <= 10 && p.stock > 0).length,
+    outOfStockCount: products.filter((p) => p.stock === 0).length,
+    totalValue: products.reduce((sum, p) => sum + p.totalValue, 0)
   }
 
-  const limparFiltros = () => {
+  const clearFilters = () => {
     setSearchTerm('')
     setSelectedCategory('todas')
     setSelectedStatus('todos')
@@ -97,39 +96,26 @@ export default function Products() {
           setSelectedStatus={setSelectedStatus}
           selectedStock={selectedStock}
           setSelectedStock={setSelectedStock}
-          categorias={categories}
-          onClearFilters={limparFiltros}
+          categories={categories}
+          onClearFilters={clearFilters}
         />
 
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-medium text-foreground">Lista de Produtos</h2>
-              <Badge variant="secondary" className="text-xs">
-                {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                Exportar
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs">
-                Excluir em Massa
-              </Button>
-            </div>
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-normal text-muted-foreground uppercase tracking-wide">Lista de produtos</h2>
+            <Badge variant="secondary" className="text-xs">
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
+            </Badge>
           </div>
-          
-                    <ProductsTable
+
+          <ProductsTable
             products={filteredProducts}
             onView={handleViewProduct}
             onEdit={handleEditProduct}
-            onClearFilters={limparFiltros}
+            onClearFilters={clearFilters}
             hasActiveFilters={!!hasActiveFilters}
           />
         </div>
-
-        <CategoriesSection />
 
         <ProductModal
           isOpen={showProductDialog}
@@ -137,7 +123,7 @@ export default function Products() {
           product={selectedProduct}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
-          categorias={categories}
+          categories={categories}
         />
       </div>
     </>

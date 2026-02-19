@@ -1,101 +1,68 @@
 import { Helmet } from 'react-helmet-async'
-import { 
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui'
-import { 
-  Store,
-  CreditCard,
-  Truck,
-  Bell,
-  Users,
-  Server
-} from 'lucide-react'
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
+import { Store, Users } from 'lucide-react'
 import { PageHeader } from '../../components/shared/PageHeader'
-import { SettingsStats } from '../../components/settings/SettingsStats'
 import { StoreSettings } from '../../components/settings/StoreSettings'
-import { PaymentSettings } from '../../components/settings/PaymentSettings'
-import { ShippingSettings } from '../../components/settings/ShippingSettings'
-import { NotificationSettings } from '../../components/settings/NotificationSettings'
 import { TeamSettings } from '../../components/settings/TeamSettings'
-import { SystemSettings } from '../../components/settings/SystemSettings'
+
+const VALID_TABS = ['loja', 'equipe'] as const
+type SettingsTab = typeof VALID_TABS[number]
+
+function isValidTab(tab: string | undefined): tab is SettingsTab {
+  return tab !== undefined && VALID_TABS.includes(tab as SettingsTab)
+}
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState('store')
+  const { tab } = useParams<{ tab: string }>()
+  const navigate = useNavigate()
+  const activeTab = isValidTab(tab) ? tab : 'loja'
+
+  useEffect(() => {
+    if (!isValidTab(tab)) {
+      navigate('/settings/loja', { replace: true })
+    }
+  }, [tab, navigate])
+
+  const setActiveTab = (value: string) => {
+    if (VALID_TABS.includes(value as SettingsTab)) {
+      navigate(`/settings/${value}`, { replace: true })
+    }
+  }
 
   return (
     <>
       <Helmet>
-        <title>Configurações - Admin</title>
+        <title>Configurações - Painel</title>
       </Helmet>
 
       <div className="space-y-4">
         <PageHeader
           title="Configurações"
-          description="Configure sua loja e preferências do sistema"
+          description="Dados da loja e equipe"
         />
 
-        <SettingsStats />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-auto p-1 max-w-md">
+            <TabsTrigger value="loja" className="text-xs h-9">
+              <Store className="w-3 h-3 mr-1" />
+              Loja
+            </TabsTrigger>
+            <TabsTrigger value="equipe" className="text-xs h-9">
+              <Users className="w-3 h-3 mr-1" />
+              Equipe
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="space-y-3">
-          <h2 className="text-base font-medium text-foreground">Seções de Configuração</h2>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto p-1">
-              <TabsTrigger value="store" className="text-xs h-9">
-                <Store className="w-3 h-3 mr-1" />
-                Loja
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="text-xs h-9">
-                <CreditCard className="w-3 h-3 mr-1" />
-                Pagamentos
-              </TabsTrigger>
-              <TabsTrigger value="shipping" className="text-xs h-9">
-                <Truck className="w-3 h-3 mr-1" />
-                Envio
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="text-xs h-9">
-                <Bell className="w-3 h-3 mr-1" />
-                Notificações
-              </TabsTrigger>
-              <TabsTrigger value="team" className="text-xs h-9">
-                <Users className="w-3 h-3 mr-1" />
-                Equipe
-              </TabsTrigger>
-              <TabsTrigger value="system" className="text-xs h-9">
-                <Server className="w-3 h-3 mr-1" />
-                Sistema
-              </TabsTrigger>
-            </TabsList>
+          <TabsContent value="loja" className="space-y-4 mt-4">
+            <StoreSettings />
+          </TabsContent>
 
-            <TabsContent value="store" className="space-y-4">
-              <StoreSettings />
-            </TabsContent>
-
-            <TabsContent value="payments" className="space-y-4">
-              <PaymentSettings />
-            </TabsContent>
-
-            <TabsContent value="shipping" className="space-y-4">
-              <ShippingSettings />
-            </TabsContent>
-
-            <TabsContent value="notifications" className="space-y-4">
-              <NotificationSettings />
-            </TabsContent>
-
-            <TabsContent value="team" className="space-y-4">
-              <TeamSettings />
-            </TabsContent>
-
-            <TabsContent value="system" className="space-y-4">
-              <SystemSettings />
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="equipe" className="space-y-4 mt-4">
+            <TeamSettings />
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   )
