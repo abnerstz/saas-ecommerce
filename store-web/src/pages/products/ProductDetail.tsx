@@ -92,20 +92,22 @@ export default function ProductDetail() {
               <p className="text-2xl font-semibold text-primary tabular-nums mt-2">
                 R$ {Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
-              {(product.short_description || product.description) && (
-                <p className="text-sm text-muted-foreground mt-3">
-                  {product.short_description || product.description}
-                </p>
-              )}
             </div>
+
+            {(product.description || product.short_description) && (
+              <div>
+                <h2 className="text-sm font-medium text-foreground mb-2">Descrição</h2>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {product.description || product.short_description}
+                </p>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 text-sm">
               {inStock ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                  <span className="text-muted-foreground">
-                    Em estoque {maxQty > 0 ? `(${maxQty} un.)` : ''}
-                  </span>
+                  <span className="text-muted-foreground">Em estoque</span>
                 </>
               ) : (
                 <>
